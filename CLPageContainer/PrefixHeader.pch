@@ -1,0 +1,26 @@
+//
+//  PrefixHeader.pch
+//  CLPageContainer
+//
+//  Created by tigerfly on 2020/5/30.
+//  Copyright © 2020 tigerfly. All rights reserved.
+//
+
+#ifndef PrefixHeader_pch
+#define PrefixHeader_pch
+
+
+// Include any system framework and library headers here that should be included in all compilation units.
+// You will also need to set the Prefix Header build setting of one or more of your targets to reference this file.
+#if __IPHONE_OS_VERSION_MAX_ALLOWED >= __IPHONE_13_0
+#define STATUSBAR  [UIApplication sharedApplication].delegate.window.windowScene.statusBarManager.statusBarFrame.size.height
+#else
+#define STATUSBAR [UIApplication sharedApplication].statusBarFrame.size.height
+#endif
+
+#define SCREEN_WIDTH [UIScreen mainScreen].bounds.size.width
+#define SCREEN_HEIGHT [UIScreen mainScreen].bounds.size.height
+
+
+
+#endif /* PrefixHeader_pch */
