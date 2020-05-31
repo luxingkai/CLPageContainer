@@ -30,11 +30,28 @@
     _titleLab.textAlignment = NSTextAlignmentCenter;
     [self addSubview:_titleLab];
     _titleLab.frame = CGRectMake(0, 0, self.frame.size.width, self.frame.size.height);
+    
+    [self addObserver:self forKeyPath:@"selected" options:NSKeyValueObservingOptionNew | NSKeyValueObservingOptionOld context:nil];
 }
 
 - (void)setTitle:(NSString *)title {
     _title = title;
     _titleLab.text = title;
+}
+
+#pragma mark --
+
+- (void)observeValueForKeyPath:(NSString *)keyPath
+                      ofObject:(id)object
+                        change:(NSDictionary<NSKeyValueChangeKey,id> *)change
+                       context:(void *)context {
+    if ([keyPath isEqualToString:@"selected"]) {
+        if ([change[@"new"] intValue] == 1) {
+            _titleLab.textColor = [UIColor redColor];
+        }else {
+            _titleLab.textColor = [UIColor blackColor];
+        }
+    }
 }
 
 @end
@@ -47,6 +64,7 @@
 @implementation CLPageTitleView {
     
     UICollectionView *_collectionView;
+    NSUInteger _defaultSelectIndex;
 }
 
 static NSString *const titleIdentifier = @"titleIdentifier";
@@ -63,6 +81,7 @@ static NSString *const titleIdentifier = @"titleIdentifier";
     
     if (self = [super initWithFrame:frame]) {
         self.backgroundColor = UIColor.whiteColor;
+        _defaultSelectIndex = 1; //默认选中第一项
         [self setupSubViews];
     }
     return self;
@@ -80,8 +99,12 @@ static NSString *const titleIdentifier = @"titleIdentifier";
     _collectionView.delegate = self;
     _collectionView.dataSource = self;
     _collectionView.backgroundColor = [UIColor whiteColor];
+    _collectionView.showsVerticalScrollIndicator = NO;
+    _collectionView.showsHorizontalScrollIndicator = NO;
+    _collectionView.allowsSelection = YES;
     [self addSubview:_collectionView];
-    
+    [_collectionView selectItemAtIndexPath:[NSIndexPath indexPathForRow:1 inSection:0] animated:true scrollPosition:UICollectionViewScrollPositionNone];
+
     [_collectionView registerClass:[CLPageTitleCell class] forCellWithReuseIdentifier:titleIdentifier];
 }
 
@@ -103,6 +126,11 @@ static NSString *const titleIdentifier = @"titleIdentifier";
     CGFloat width = [_titles[indexPath.row] boundingRectWithSize:CGSizeMake(MAXFLOAT, 45.0) options:NSStringDrawingUsesLineFragmentOrigin attributes:@{NSFontAttributeName:[UIFont fontWithName:@"PingFangSc-Regular" size:12]} context:nil].size.width;
     return CGSizeMake(width + 16.0, 45.0f);
 }
+
+- (void)collectionView:(UICollectionView *)collectionView didSelectItemAtIndexPath:(NSIndexPath *)indexPath {
+    
+}
+
 
 
 #pragma mark -- Setter
