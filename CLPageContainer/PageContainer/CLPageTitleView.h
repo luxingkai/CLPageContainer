@@ -19,6 +19,10 @@ NS_ASSUME_NONNULL_BEGIN
 @interface CLPageTitleView : UIView
 
 @property (nonatomic, strong) NSArray *titles;
+/// 分页器偏移量
+@property (nonatomic, assign) CGFloat pageContainerOffset;
+/// 选中项
+@property (nonatomic, assign) NSUInteger nextIndex;
 
 @end
 

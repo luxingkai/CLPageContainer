@@ -29,6 +29,10 @@
                          [DemoViewController new],
                          [DemoViewController new],
                          [DemoViewController new],
+                         [DemoViewController new],
+                         [DemoViewController new],
+                         [DemoViewController new],
+                         [DemoViewController new],
                          [DemoViewController new]];
     
     CLPageContainer *pageContainer = [[CLPageContainer alloc] initWithFrame:[UIScreen mainScreen].bounds];

@@ -65,6 +65,7 @@
     
     UICollectionView *_collectionView;
     NSUInteger _defaultSelectIndex;
+    CGFloat _titleContentWidth;
 }
 
 static NSString *const titleIdentifier = @"titleIdentifier";
@@ -81,7 +82,7 @@ static NSString *const titleIdentifier = @"titleIdentifier";
     
     if (self = [super initWithFrame:frame]) {
         self.backgroundColor = UIColor.whiteColor;
-        _defaultSelectIndex = 1; //默认选中第一项
+        _defaultSelectIndex = 0; //默认选中第一项
         [self setupSubViews];
     }
     return self;
@@ -101,14 +102,13 @@ static NSString *const titleIdentifier = @"titleIdentifier";
     _collectionView.backgroundColor = [UIColor whiteColor];
     _collectionView.showsVerticalScrollIndicator = NO;
     _collectionView.showsHorizontalScrollIndicator = NO;
-    _collectionView.allowsSelection = YES;
+    _collectionView.allowsSelection = true;
     [self addSubview:_collectionView];
-    [_collectionView selectItemAtIndexPath:[NSIndexPath indexPathForRow:1 inSection:0] animated:true scrollPosition:UICollectionViewScrollPositionNone];
 
     [_collectionView registerClass:[CLPageTitleCell class] forCellWithReuseIdentifier:titleIdentifier];
 }
 
-#pragma mark --
+#pragma mark -- UICollectionViewDataSource
 
 - (NSInteger)collectionView:(UICollectionView *)collectionView numberOfItemsInSection:(NSInteger)section {
     return _titles.count;
@@ -128,9 +128,8 @@ static NSString *const titleIdentifier = @"titleIdentifier";
 }
 
 - (void)collectionView:(UICollectionView *)collectionView didSelectItemAtIndexPath:(NSIndexPath *)indexPath {
-    
-}
 
+}
 
 
 #pragma mark -- Setter
@@ -138,8 +137,42 @@ static NSString *const titleIdentifier = @"titleIdentifier";
 - (void)setTitles:(NSArray *)titles {
     _titles = titles;
     [_collectionView reloadData];
+    [_collectionView selectItemAtIndexPath:[NSIndexPath indexPathForRow:_defaultSelectIndex inSection:0] animated:true scrollPosition:UICollectionViewScrollPositionNone];
 }
 
+- (void)setPageContainerOffset:(CGFloat)pageContainerOffset {
+    
+    NSInteger selectedIndex = pageContainerOffset / SCREEN_WIDTH;
+    
+    
+}
+
+
+/// 设置下一个选中项
+/// @param nextIndex <#nextIndex description#>
+- (void)setNextIndex:(NSUInteger)nextIndex {
+    if (_nextIndex == nextIndex) return;
+    _nextIndex = nextIndex;
+
+    [_collectionView selectItemAtIndexPath:[NSIndexPath indexPathForRow:nextIndex inSection:0] animated:true scrollPosition:UICollectionViewScrollPositionNone];
+    
+    CGSize contentSize = _collectionView.contentSize;
+    UICollectionViewCell *nextCell = [_collectionView cellForItemAtIndexPath:[NSIndexPath indexPathForRow:nextIndex inSection:0]];
+    CGPoint origin = nextCell.frame.origin;
+    CGSize cellSize = nextCell.frame.size;
+    
+    CGFloat anotherMove = (origin.x + cellSize.width/2.0);
+    if (anotherMove >= SCREEN_WIDTH / 2.0 && (contentSize.width - (origin.x + cellSize.width/2.0)) >= SCREEN_WIDTH/2.0) {
+        [UIView animateWithDuration:0.25 animations:^{
+            _collectionView.contentOffset = CGPointMake(anotherMove - SCREEN_WIDTH/2.0, 0);
+        } completion:^(BOOL finished) {
+        }];
+    }
+    
+    if ((contentSize.width - (origin.x + cellSize.width/2.0)) > SCREEN_WIDTH/2.0) {
+        
+    }
+}
 
 
 @end

@@ -61,6 +61,8 @@ static NSString *const cellIdentifier = @"cellIdentifier";
     _containerView.contentInsetAdjustmentBehavior = UIScrollViewContentInsetAdjustmentNever;
     _containerView.showsHorizontalScrollIndicator = false;
     _containerView.showsVerticalScrollIndicator = false;
+    _containerView.scrollEnabled = true;
+    _containerView.decelerationRate = UIScrollViewDecelerationRateFast;
     [self addSubview:_containerView];
     
     [_containerView registerClass:[UICollectionViewCell class] forCellWithReuseIdentifier:cellIdentifier];
@@ -105,29 +107,39 @@ static NSString *const cellIdentifier = @"cellIdentifier";
 #pragma mark -- 处理滚动过程
 
 - (void)scrollViewDidScroll:(UIScrollView *)scrollView {
-    
-    NSLog(@"contentOff %f",scrollView.contentOffset.x);
+    if (scrollView.contentOffset.x <= 0.0) {
+        scrollView.contentOffset = CGPointZero;
+        return;
+    }
+    if (scrollView.contentOffset.x >= (_number - 1) * SCREEN_WIDTH) {
+        scrollView.contentOffset = CGPointMake((_number - 1) * SCREEN_WIDTH, 0);
+        return;
+    }
+    _titleView.pageContainerOffset = scrollView.contentOffset.x;
 }
 
 // 处理开始拖拽
 - (void)scrollViewWillBeginDragging:(UIScrollView *)scrollView {
-    NSLog(@"开始拖拽");
+//    NSLog(@"开始拖拽");
 }
 //拖拽过程中手指离开，将要结束拖拽
 - (void)scrollViewWillEndDragging:(UIScrollView *)scrollView withVelocity:(CGPoint)velocity targetContentOffset:(inout CGPoint *)targetContentOffset  {
-    NSLog(@"将要结束拖拽");
+//    NSLog(@"将要结束拖拽");
 }
 //拖拽过程中手指离开，结束拖拽
 - (void)scrollViewDidEndDragging:(UIScrollView *)scrollView willDecelerate:(BOOL)decelerate {
-    NSLog(@"结束拖拽");
+//    NSLog(@"结束拖拽");
 }
 //开始减速
 - (void)scrollViewWillBeginDecelerating:(UIScrollView *)scrollView {
-    NSLog(@"开始减速");
+//    NSLog(@"开始减速");
 }
 //结束减速，停止滚动
 - (void)scrollViewDidEndDecelerating:(UIScrollView *)scrollView {
-    NSLog(@"结束减速");
+//    NSLog(@"结束减速");
+    
+    _titleView.nextIndex = scrollView.contentOffset.x / SCREEN_WIDTH;
+    
 }
 // called when setContentOffset/scrollRectVisible:animated: finishes. not called if not animating
 - (void)scrollViewDidEndScrollingAnimation:(UIScrollView *)scrollView {
