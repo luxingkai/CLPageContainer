@@ -41,10 +41,7 @@
 
 #pragma mark --
 
-- (void)observeValueForKeyPath:(NSString *)keyPath
-                      ofObject:(id)object
-                        change:(NSDictionary<NSKeyValueChangeKey,id> *)change
-                       context:(void *)context {
+- (void)observeValueForKeyPath:(NSString *)keyPath ofObject:(id)object change:(NSDictionary<NSKeyValueChangeKey,id> *)change context:(void *)context {
     if ([keyPath isEqualToString:@"selected"]) {
         if ([change[@"new"] intValue] == 1) {
             _titleLab.textColor = [UIColor redColor];
@@ -56,7 +53,13 @@
 
 @end
 
-
+/*
+ 需要解决的问题
+ 1.快速滑动到每一个指定的滑块时，需要明确显示其选中状态
+ 2.滑动页面时，选中滑块必须出现可视视野中
+ 3.点击滑块可居中显示
+ 4.点击滑块联动列表页
+ */
 @interface CLPageTitleView ()<UICollectionViewDelegateFlowLayout,UICollectionViewDataSource>
 
 @end
@@ -64,6 +67,7 @@
 @implementation CLPageTitleView {
     
     UICollectionView *_collectionView;
+    UIView *_bottomLine;
     NSUInteger _defaultSelectIndex;
     CGFloat _titleContentWidth;
 }
@@ -106,6 +110,11 @@ static NSString *const titleIdentifier = @"titleIdentifier";
     [self addSubview:_collectionView];
 
     [_collectionView registerClass:[CLPageTitleCell class] forCellWithReuseIdentifier:titleIdentifier];
+    
+    _bottomLine = [UIView new];
+    _bottomLine.backgroundColor = [UIColor redColor];
+    [self addSubview:_bottomLine];
+
 }
 
 #pragma mark -- UICollectionViewDataSource
@@ -122,12 +131,17 @@ static NSString *const titleIdentifier = @"titleIdentifier";
 }
 
 - (CGSize)collectionView:(UICollectionView *)collectionView layout:(UICollectionViewLayout *)collectionViewLayout sizeForItemAtIndexPath:(NSIndexPath *)indexPath {
-
     CGFloat width = [_titles[indexPath.row] boundingRectWithSize:CGSizeMake(MAXFLOAT, 45.0) options:NSStringDrawingUsesLineFragmentOrigin attributes:@{NSFontAttributeName:[UIFont fontWithName:@"PingFangSc-Regular" size:12]} context:nil].size.width;
     return CGSizeMake(width + 16.0, 45.0f);
 }
 
 - (void)collectionView:(UICollectionView *)collectionView didSelectItemAtIndexPath:(NSIndexPath *)indexPath {
+    if ([_delegate respondsToSelector:@selector(pageTitleView:index:)]) {
+        [_delegate pageTitleView:self index:indexPath.row];
+    }
+}
+
+- (void)scrollViewDidScroll:(UIScrollView *)scrollView {
 
 }
 
@@ -143,34 +157,41 @@ static NSString *const titleIdentifier = @"titleIdentifier";
 - (void)setPageContainerOffset:(CGFloat)pageContainerOffset {
     
     NSInteger selectedIndex = pageContainerOffset / SCREEN_WIDTH;
-    
-    
 }
 
 
 /// 设置下一个选中项
-/// @param nextIndex <#nextIndex description#>
+/// @param nextIndex 指定滑块的index
 - (void)setNextIndex:(NSUInteger)nextIndex {
     if (_nextIndex == nextIndex) return;
     _nextIndex = nextIndex;
 
+    //处理指定滑块的选中状态
     [_collectionView selectItemAtIndexPath:[NSIndexPath indexPathForRow:nextIndex inSection:0] animated:true scrollPosition:UICollectionViewScrollPositionNone];
     
     CGSize contentSize = _collectionView.contentSize;
     UICollectionViewCell *nextCell = [_collectionView cellForItemAtIndexPath:[NSIndexPath indexPathForRow:nextIndex inSection:0]];
     CGPoint origin = nextCell.frame.origin;
     CGSize cellSize = nextCell.frame.size;
-    
+    //指定滑块中心点距离
     CGFloat anotherMove = (origin.x + cellSize.width/2.0);
-    if (anotherMove >= SCREEN_WIDTH / 2.0 && (contentSize.width - (origin.x + cellSize.width/2.0)) >= SCREEN_WIDTH/2.0) {
+    CGFloat rightInset = (contentSize.width - (origin.x + cellSize.width/2.0));
+    
+    if (anotherMove >= SCREEN_WIDTH / 2.0 && rightInset > SCREEN_WIDTH / 2.0) {
         [UIView animateWithDuration:0.25 animations:^{
             _collectionView.contentOffset = CGPointMake(anotherMove - SCREEN_WIDTH/2.0, 0);
         } completion:^(BOOL finished) {
         }];
     }
-    
-    if ((contentSize.width - (origin.x + cellSize.width/2.0)) > SCREEN_WIDTH/2.0) {
-        
+    if (anotherMove < SCREEN_WIDTH / 2.0) {
+        [UIView animateWithDuration:0.25 animations:^{
+            _collectionView.contentOffset = CGPointZero;
+        }];
+    }
+    if (rightInset <= SCREEN_WIDTH / 2.0) {
+        [UIView animateWithDuration:0.25 animations:^{
+            _collectionView.contentOffset = CGPointMake(contentSize.width - SCREEN_WIDTH, 0);
+        }];
     }
 }
 

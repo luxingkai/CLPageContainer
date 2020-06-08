@@ -9,7 +9,7 @@
 #import "CLPageContainer.h"
 #import "CLPageTitleView.h"
 
-@interface CLPageContainer ()<UICollectionViewDelegate,UICollectionViewDataSource>
+@interface CLPageContainer ()<UICollectionViewDelegate,UICollectionViewDataSource,CLPageTitleViewDelegate>
 
 @end
  
@@ -44,6 +44,7 @@ static NSString *const cellIdentifier = @"cellIdentifier";
 - (void)setupSubViews {
     
     _titleView = [[CLPageTitleView alloc] initWithFrame:CGRectMake(0, STATUSBAR + 44.0, SCREEN_WIDTH, 50)];
+    _titleView.delegate = self;
     [self addSubview:_titleView];
     
     UICollectionViewFlowLayout *flowLayout = [[UICollectionViewFlowLayout alloc] init];
@@ -90,6 +91,12 @@ static NSString *const cellIdentifier = @"cellIdentifier";
 - (void)collectionView:(UICollectionView *)collectionView didEndDisplayingCell:(UICollectionViewCell *)cell forItemAtIndexPath:(NSIndexPath *)indexPath {
     _currentViewController = [_dataSource pageContainer:self viewControllerForIndex:indexPath.row];
     [_currentViewController.view removeFromSuperview];
+}
+
+#pragma mark -- CLPageTitleViewDelegate
+
+- (void)pageTitleView:(CLPageTitleView *)view index:(NSUInteger)index {
+    [_containerView scrollToItemAtIndexPath:[NSIndexPath indexPathForRow:index inSection:0] atScrollPosition:UICollectionViewScrollPositionNone animated:true];
 }
 
 

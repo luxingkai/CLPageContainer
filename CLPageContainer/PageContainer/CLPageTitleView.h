@@ -10,6 +10,14 @@
 
 NS_ASSUME_NONNULL_BEGIN
 
+@class CLPageTitleView;
+@protocol CLPageTitleViewDelegate <NSObject>
+
+@optional
+- (void)pageTitleView:(CLPageTitleView *)view index:(NSUInteger)index;
+
+@end
+
 @interface CLPageTitleCell : UICollectionViewCell
 
 @property (nonatomic, strong) NSString *title;
@@ -23,6 +31,8 @@ NS_ASSUME_NONNULL_BEGIN
 @property (nonatomic, assign) CGFloat pageContainerOffset;
 /// 选中项
 @property (nonatomic, assign) NSUInteger nextIndex;
+
+@property (nonatomic, weak) id<CLPageTitleViewDelegate>delegate;
 
 @end
 
